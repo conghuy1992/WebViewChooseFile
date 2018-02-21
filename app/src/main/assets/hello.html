@@ -1,0 +1,27 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Get json status</title>
+</head>
+<body>
+  <p>Get value from other app</p>
+  <div class="business_logic">
+    <a href="javascript:void(0)" onclick="test_onClick()">Click me!</a>
+    <p id="config_field">change this text</p>
+  </div>
+  <input type="file"
+  />
+  <script type="text/javascript">
+	
+	    function test_onClick() {
+        Android.openApp2();
+    }
+
+	
+    function get_config(config) {
+      // please change this function to get value from other phone app.
+      return config
+    }
+  </script>
+</body>
+</html>
