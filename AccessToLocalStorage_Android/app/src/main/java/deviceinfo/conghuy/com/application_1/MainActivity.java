@@ -39,20 +39,15 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "MainActivity";
-    private int REQUEST_CODE = 99;
-    private String KEY = "KEY";
-    private String packageApp2 = "deviceinfo.conghuy.com.application_2";
-    private String packageApp2Class = packageApp2 + ".MainActivity";
     private WebView mWebView;
     private WebSettings webSettings;
-//    private String url = "http://10.0.3.2/alpine/hello.html";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mWebView = (WebView) findViewById(R.id.webView);
-        mWebView.addJavascriptInterface(new WebAppInterface(this), "Android");
+//        mWebView.addJavascriptInterface(new WebAppInterface(this), "Android");
         // webSettings
         webSettings();
 
@@ -83,24 +78,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         webSettings.setDatabaseEnabled(true);
     }
 
-    public class WebAppInterface {
-        Context mContext;
-
-        /**
-         * Instantiate the interface and set the context
-         */
-        WebAppInterface(Context c) {
-            mContext = c;
-        }
-
-        /**
-         * get func from the web page
-         */
-        @JavascriptInterface
-        public void openApp2() {
-            launch();
-        }
-    }
 
     private class MyWebViewClient extends WebViewClient {
 
@@ -172,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         public void onPermissionsChecked(MultiplePermissionsReport report) {
                             if (report.areAllPermissionsGranted()) {
                                 mFilePathCallback = filePathCallback;
-                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                                 intent.setType("*/*");
                                 startActivityForResult(
@@ -189,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             token.continuePermissionRequest();
                         }
                     }).check();
-            Log.d(TAG,"onShowFileChooser");
+            Log.d(TAG, "onShowFileChooser");
             return true;
 
         }
@@ -204,16 +181,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void launch() {
-        try {
-            Intent myIntent = new Intent();
-            myIntent.setClassName(packageApp2, packageApp2Class);
-            startActivityForResult(myIntent, REQUEST_CODE);
-        } catch (android.content.ActivityNotFoundException anfe) {
-            startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("http://play.google.com/store/apps/details?id=" + packageApp2)));
-        }
-    }
 
     @Override
     public void onClick(View v) {
@@ -241,8 +208,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     : intent.getData();
             if (result != null) {
                 String path = MediaUtility.getPath(MainActivity.this, result);
-                Uri uri = Uri.fromFile(new File(path));
-                mFilePathCallback.onReceiveValue(new Uri[]{uri});
+                Log.d(TAG, "path:" + path);
+                if (path == null || path.length() == 0 || path.equals("null")) {
+                    Toast.makeText(getApplicationContext(), "This file not inside your device", Toast.LENGTH_SHORT).show();
+                    mFilePathCallback.onReceiveValue(null);
+                } else {
+                    Uri uri = Uri.fromFile(new File(path));
+                    mFilePathCallback.onReceiveValue(new Uri[]{uri});
+                }
+
             } else {
                 mFilePathCallback.onReceiveValue(null);
             }
